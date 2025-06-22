@@ -1,59 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { QueryProvider } from './providers/QueryProvider';
+import { Navbar } from './layout';
+import { Home, Dashboard } from './pages';
+import { AuthPages } from './pages/Auth';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8">
-      <div className="flex gap-8 mb-8">
-        <a 
-          href="https://vite.dev" 
-          target="_blank" 
-          className="block hover:scale-110 transition-transform duration-300"
-        >
-          <img 
-            src={viteLogo} 
-            className="h-24 w-24 hover:drop-shadow-[0_0_2em_#646cffaa]" 
-            alt="Vite logo" 
-          />
-        </a>
-        <a 
-          href="https://react.dev" 
-          target="_blank"
-          className="block hover:scale-110 transition-transform duration-300"
-        >
-          <img 
-            src={reactLogo} 
-            className="h-24 w-24 animate-spin hover:drop-shadow-[0_0_2em_#61dafbaa]" 
-            alt="React logo"
-            style={{ animationDuration: '20s' }}
-          />
-        </a>
-      </div>
-      
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">
-        Vite + React
-      </h1>
-      
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-        <button 
-          onClick={() => setCount((count) => count + 1)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 mb-4"
-        >
-          count is {count}
-        </button>
-        <p className="text-gray-600">
-          Edit <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      
-      <p className="text-gray-500 mt-8 text-sm">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    <QueryProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <Navbar />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <SignedIn>
+                    <Dashboard />
+                  </SignedIn>
+                } 
+              />
+              <Route 
+                path="/auth/*" 
+                element={
+                  <SignedOut>
+                    <AuthPages />
+                  </SignedOut>
+                } 
+              />
+              <Route 
+                path="/protected" 
+                element={
+                  <>
+                    <SignedIn>
+                      <div className="p-8">
+                        <h1 className="text-2xl font-bold">Protected Content</h1>
+                        <p>This content is only visible to signed-in users.</p>
+                      </div>
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                } 
+              />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </QueryProvider>
+  );
 }
 
-export default App
+export default App;
